@@ -1,4 +1,4 @@
-public class Blob extends Entity {
+public abstract class Blob extends Entity {
   //fields
   private float ax, ay, vx, vy, speed, hp;
   //constructor
@@ -9,7 +9,7 @@ public class Blob extends Entity {
   }
   //methods
   public void move() {
-    hp -= 0.5;
+    hp -= 0.05;
     
     if (hp <= 0.0) {
       super.setActive(false); 
@@ -32,12 +32,31 @@ public class Blob extends Entity {
   
   public void blobVsFood(Food food) {
     if (dist(super.getX(),super.getY(),food.getX(),food.getY()) < (super.getSize() + food.getSize())/2.0) {
+      System.out.println("ate food");
       eat(food);
     }
   }
-  //getters and setters
-  public double getHp() {
-   return hp; 
+  
+  //3.6 define blobVsVirus
+  private void sick(Virus virus) {
+    hp -= 50;
+    virus.setActive(false);
   }
+  
+  public void blobVsVirus(Virus virus) {
+   if ((dist(super.getX(),super.getY(),virus.getX(),virus.getY()) < (super.getSize() + virus.getSize())/2.0) && virus.isActive()) {
+     sick(virus); 
+   } 
+  }
+  //getters and setters
+  public float getHp() {
+    return hp;
+  }
+  
+  public void damage(int d) {
+    hp -= d; 
+  }
+  
+  public abstract Blob reproduce();
   
 }

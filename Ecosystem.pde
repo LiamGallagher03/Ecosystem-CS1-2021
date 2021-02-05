@@ -1,7 +1,10 @@
 ArrayList<Blob> blobs = new ArrayList();
-ArrayList<Food> foods = new ArrayList();
 ArrayList<Blue> blues = new ArrayList();
 ArrayList<Red> reds = new ArrayList();
+ArrayList<Food> foods = new ArrayList();
+//3.3 create ArrayList viruses
+ArrayList<Virus> viruses = new ArrayList();
+
 String mode = "";
 
 public void setup() {
@@ -10,48 +13,64 @@ public void setup() {
 
 public void draw() {
   background(200);
-
+  
+  ArrayList<Blue> blueBabies = new ArrayList();
+  ArrayList<Red> redBabies = new ArrayList();
+  
+  for (Blue blue : blues) {
+    if (blue.isActive()) {
+      for (Red red : reds) {
+        if (red.isActive()) { 
+          blue.fight(red);
+        }
+      }
+      Blue maybeBaby = (Blue) blue.reproduce();
+      if (maybeBaby != null) {
+        blueBabies.add(maybeBaby);
+        blobs.add(maybeBaby);
+      }
+    }
+  }
+  
+  for (Red red : reds) {
+    Red maybeBaby = (Red) red.reproduce();
+      if (maybeBaby != null) {
+        redBabies.add(maybeBaby);
+        blobs.add(maybeBaby);
+      }
+  }
+  
+  for (Blue baby : blueBabies) {
+    if (baby != null) blues.add(baby);
+  }
+  for (Red baby : redBabies) {
+    if (baby != null) reds.add(baby);
+  }
+  
   for (Blob blob : blobs) {
     if (!blob.isActive()) continue;
-    
+
     for (Food food : foods) {
       blob.blobVsFood(food);
     }
-    
+    //3.7 check for collision between Blobs and Viruses
+    for (Virus virus : viruses) {
+     blob.blobVsVirus(virus); 
+    }
     blob.move();
     blob.draw();
   }
   for (Food food : foods) {
     if (!food.isActive()) continue;
-    
+
     food.draw();
   }
-  for (Blue blue : blues) {
-    if (!blue.isActive()) continue;
-    
-    for (Food food : foods) {
-      blue.blobVsFood(food);
-    }
-    
-    for (Red red : reds) {
-      blue.fight(red);
-    }
-    
-    blue.draw();
-    blue.move();
-    
+  //3.5 draw the viruses
+  for (Virus virus : viruses) {
+   if (!virus.isActive()) continue;
+   
+   virus.draw();
   }
-  for (Red red : reds) {
-    if (!red.isActive()) continue;
-    
-    for (Food food : foods) {
-      red.blobVsFood(food);
-    }
-    
-    red.draw();
-    red.move();
-  }
-  
   takeOutTheTrash();
 }
 
@@ -61,54 +80,46 @@ private void takeOutTheTrash() {
     if (!blob.isActive()) trash.add(blob);
   }
   blobs.remove(trash);
-  
+
   ArrayList<Food> trashFood = new ArrayList();
   for (Food food : foods) {
     if (!food.isActive()) trashFood.add(food);
   }
   foods.remove(trashFood);
-  
-  ArrayList<Blue> trashBlue = new ArrayList();
-  for (Blue blue : blues) {
-    if (!blue.isActive()) trashBlue.add(blue);
-  }
-  
-  ArrayList<Red> trashRed = new ArrayList();
-  for (Red red : reds) {
-    if (!red.isActive()) trashRed.add(red);
-  }
 }
 
 //1. Spawn Reds and Blues, not Blobs
 public void mouseReleased() {
-  if (mode.equals("blob")) {
-    Blob newBlob = new Blob(mouseX, mouseY, #FF00FF, 30);
+  if (mode.equals("blue")) {
+    //polymorphism
+    Blob newBlob = new Blue(mouseX, mouseY);
     blobs.add(newBlob);
-  }
-  else if (mode.equals("food")) {
+    blues.add( (Blue) newBlob);
+  } else if (mode.equals("red")) {
+    Blob newBlob = new Red(mouseX, mouseY);
+    blobs.add(newBlob);
+    reds.add( (Red) newBlob);
+  } else if (mode.equals("food")) {
     Food newFood = new Food(mouseX, mouseY);
     foods.add(newFood);
   }
-  else if (mode.equals("blue")) {
-    Blue newBlue = new Blue(mouseX, mouseY);
-    blues.add(newBlue);
+  //3.4 spawn virus on mouseClick
+   else if (mode.equals("virus")) {
+    Virus newVirus = new Virus(mouseX, mouseY);
+    viruses.add(newVirus);
+   }
 }
-  else if (mode.equals("red")) {
-    Red newRed = new Red(mouseX, mouseY);
-    reds.add(newRed);
-  }
-}
+
 public void keyPressed() {
   if (keyCode == 70) {
     mode = "food";
-    System.out.println("food mode");
+  } else if (keyCode == 82) {
+    mode = "red";
   } else if (keyCode == 66) {
-    mode = "blob";
+    mode = "blue";
   }
-    else if (keyCode == 49) {
-      mode = "blue";
+    else if (keyCode == 86) {
+     mode = "virus"; 
     }
-    else if (keyCode == 50) {
-      mode = "red";
-    }
+  //3.2 set mode to "virus" with keyCode
 }
